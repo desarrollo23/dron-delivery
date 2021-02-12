@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>287b9113-e682-45e5-afc2-e92b647e3ea9</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DronDelivery.Domain\DronDelivery.Domain.csproj" />
+    <ProjectReference Include="..\DronDelivery.Infraestructure\DronDelivery.Infraestructure.csproj" />
+  </ItemGroup>
+
+
+</Project>
