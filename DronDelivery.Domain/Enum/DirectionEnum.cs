@@ -2,6 +2,7 @@
 {
     public enum DirectionEnum
     {
+        UNDEFINED = 0,
         NORTH = 1,
         WEST = 2,
         EAST = 3,

@@ -20,11 +20,12 @@ namespace DronDelivery.Services.Controllers
         }
 
         [HttpGet("delivery")]
-        public IActionResult Get()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get()
         {
             try
             {
-                _dronHandler.Operate();
+                await _dronHandler.Operate();
             }
             catch (Exception ex)
             {

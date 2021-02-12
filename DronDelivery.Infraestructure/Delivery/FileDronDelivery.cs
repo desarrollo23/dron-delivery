@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DronDelivery.Infraestructure.Delivery
 {
@@ -20,25 +21,77 @@ namespace DronDelivery.Infraestructure.Delivery
             _pathResult = _configuration.GetSection("pathResult").Value;
         }
 
+        public FileDronDelivery()
+        {
+
+        }
+
         public void SetParameters(string pathRead, string fileName)
         {
             _pathRead = pathRead;
             _fileName = fileName;
         }
 
-        public string[] ReadFile()
+        public void SetParameters(string pathRead)
         {
-            return File.ReadAllLines(_pathRead);
+            _pathRead = pathRead;
         }
 
-        public void WriteFile(string [] result)
+        public async Task<string[]> ReadFile()
         {
-            File.WriteAllLines($"{_pathResult}\\{_fileName}", result);
+            try
+            {
+                return await File.ReadAllLinesAsync(_pathRead);
+            }
+            catch (IOException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task WriteFile(string [] result)
+        {
+            try
+            {
+                await File.WriteAllLinesAsync($"{_pathResult}\\{_fileName}", result);
+
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (IOException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public string[] GetFiles()
         {
-            return Directory.GetFiles(_pathRead);
+            try
+            {
+                return Directory.GetFiles(_pathRead);
+            }
+            catch(DirectoryNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (IOException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

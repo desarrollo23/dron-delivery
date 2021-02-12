@@ -1,8 +1,10 @@
 ﻿using DronDelivery.Domain.Interfaces;
 using DronDelivery.Domain.Model.Delivery;
-using Microsoft.Extensions.Configuration;
+using DronDelivery.Infraestructure.Helpers;
+using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace DronDelivery.Infraestructure.Delivery
 {
@@ -10,14 +12,15 @@ namespace DronDelivery.Infraestructure.Delivery
     {
         private IFileDronDelivery _fileDronDelivery;
 
-
         public DronHandler(IFileDronDelivery fileDronDelivery)
         {
             _fileDronDelivery = fileDronDelivery;
         }
-        public void Operate()
+
+        public DronHandler() { }
+
+        public async Task Operate()
         {
-            // leer desde archivo de config
             var dronesFiles = _fileDronDelivery.GetFiles();
             int dronNumber = 1;
 
@@ -30,17 +33,24 @@ namespace DronDelivery.Infraestructure.Delivery
 
                 _fileDronDelivery.SetParameters(dronFile, dron.FileNameResult);
 
-                var commands = _fileDronDelivery.ReadFile();
+                try
+                {
+                    var commands = await _fileDronDelivery.ReadFile();
 
-                var result = Movements(commands, dron);
+                    var result = Movements(commands, dron);
 
-                _fileDronDelivery.WriteFile(result);
+                    await _fileDronDelivery.WriteFile(result);
 
-                dronNumber++;
+                    dronNumber++;
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
             }
         }
 
-        private string [] Movements(string[] commands, Dron dron)
+        public string[] Movements(string[] commands, Dron dron)
         {
             List<string> result = new List<string>();
 
@@ -51,45 +61,17 @@ namespace DronDelivery.Infraestructure.Delivery
                     switch (letter)
                     {
                         case 'A':
-                            if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.NORTH)
-                                dron.Coordinates.YAxis += 1;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.WEST)
-                                dron.Coordinates.XAxis -= 1;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.SOUTH)
-                                dron.Coordinates.YAxis -= 1;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.EAST)
-                                dron.Coordinates.XAxis += 1;
+                            DirectionEnumHelper.GoAHead(ref dron);
                             break;
 
                         case 'I':
-                            if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.NORTH)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.WEST;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.EAST)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.NORTH;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.SOUTH)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.EAST;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.WEST)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.SOUTH;
+                            dron.Coordinates.Direction =
+                                DirectionEnumHelper.NextDirection(false, dron.Coordinates.Direction);
                             break;
 
                         case 'D':
-                            if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.NORTH)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.EAST;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.EAST)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.SOUTH;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.SOUTH)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.WEST;
-
-                            else if (dron.Coordinates.Direction == Domain.Enum.DirectionEnum.WEST)
-                                dron.Coordinates.Direction = Domain.Enum.DirectionEnum.NORTH;
+                            dron.Coordinates.Direction =
+                                DirectionEnumHelper.NextDirection(true, dron.Coordinates.Direction);
                             break;
 
                         default:
@@ -98,12 +80,9 @@ namespace DronDelivery.Infraestructure.Delivery
 
                 }
                 result.Add(dron.DeliveryResult);
-
             }
 
             return result.ToArray();
         }
-
-
     }
 }
